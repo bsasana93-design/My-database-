@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Data Vault - Telegram Style</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            overflow-x: hidden;
+            padding-bottom: 90px;
+        }
+
+        /* Top Header */
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: #181818;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .windows-icon {
+            font-size: 22px;
+            color: #00a4ef; /* Windows Blue Color */
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            font-size: 18px;
+            color: #e0e0e0;
+        }
+
+        .header-right i {
+            cursor: pointer;
+        }
+
+        /* Search Bar */
+        .search-container {
+            display: none;
+            background-color: #222222;
+            padding: 10px 16px;
+            border-bottom: 1px solid #2c2c2c;
+        }
+
+        .search-container input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* Archived / Summary Row */
+        .archived-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 14px;
+            background-color: #161616;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .archive-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: #2b2b2b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .ai-orb {
+            width: 52px;
+            height: 52px;
+            padding: 4px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: conic-gradient(#ff375f, #ffcc00, #34c759, #00c7ff, #5856d6, #ff2d95, #ff375f);
+            animation: aiOrbSpin 4s linear infinite;
+            box-shadow: 0 0 16px rgba(0, 199, 255, .35);
+        }
+
+        .ai-orb span {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            border-radius: inherit;
+            background: #161616;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        @keyframes aiOrbSpin { to { transform: rotate(360deg); } }
+
+        .ai-assistant {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            display: none;
+            flex-direction: column;
+            background: radial-gradient(ellipse at 50% 45%, #17203a, #090b14 65%, #02030a);
+        }
+
+        .ai-assistant.open { display: flex; }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(24, 24, 24, .92);
+            box-shadow: 0 2px 8px rgba(0,0,0,.35);
+        }
+
+        .ai-header .ai-orb { width: 42px; height: 42px; }
+        .ai-heading { flex: 1; }
+        .ai-heading strong { display: block; }
+        .ai-heading small { color: #aaa; }
+        .ai-settings-toggle {
+            border: 0;
+            background: transparent;
+            color: #ddd;
+            font-size: 18px;
+            padding: 9px;
+            cursor: pointer;
+        }
+        .ai-key-panel {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 12px;
+            background: #20232d;
+        }
+        .ai-key-panel.open { display: flex; }
+        .ai-key-panel input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 12px;
+            border: 1px solid #41475c;
+            border-radius: 9px;
+            background: #11131a;
+            color: #fff;
+        }
+        .ai-key-panel button {
+            border: 0;
+            border-radius: 9px;
+            padding: 0 12px;
+            color: #fff;
+            background: #4ecc5e;
+            cursor: pointer;
+        }
+        .app-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 95px;
+            z-index: 600;
+            max-width: calc(100% - 32px);
+            padding: 13px 18px;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 16px;
+            background: rgba(38, 40, 48, .97);
+            color: #fff;
+            box-shadow: 0 8px 28px rgba(0,0,0,.55);
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, 14px);
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .app-toast.show { opacity: 1; transform: translate(-50%, 0); }
+        @media (min-width: 700px) {
+            .app-toast { bottom: 30px; }
+        }
+        .ai-close {
+            border: 0;
+            background: transparent;
+            color: #eee;
+            font-size: 22px;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 18px 14px;
+        }
+
+        .ai-bubble {
+            max-width: 88%;
+            padding: 11px 13px;
+            border-radius: 14px;
+            background: rgba(35, 39, 57, .94);
+            color: #f4f4f6;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .ai-bubble.user { align-self: flex-end; background: #285b39; }
+        .ai-bubble.error { color: #ff6b6b; border: 1px solid rgba(255, 80, 80, .35); }
+        .ai-bubble-text { white-space: pre-wrap; }
+        .ai-result {
+            display: block;
+            width: 100%;
+            margin-top: 9px;
+            padding: 10px;
+            border: 1px solid #41475c;
+            border-radius: 9px;
+            background: rgba(255,255,255,.06);
+            color: #fff;
+            text-align: left;
+            cursor: pointer;
+        }
+        .ai-result strong, .ai-result span { display: block; }
+        .ai-result span { margin-top: 3px; color: #c3c7d3; font-size: 13px; }
+
+        .ai-composer {
+            display: flex;
+            gap: 10px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background: rgba(24, 24, 24, .96);
+        }
+        .ai-composer input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            border-radius: 24px;
+            padding: 13px 16px;
+            color: #fff;
+            background: #292929;
+            font-size: 15px;
+        }
+        .ai-composer button {
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 50%;
+            color: #fff;
+            background: #4ecc5e;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ai-orb { animation: none; }
+        }
+        @media (min-width: 700px) {
+            .ai-assistant { width: 100%; max-width: 709px; left: 50%; transform: translateX(-50%); border-left: 1px solid #303030; border-right: 1px solid #303030; }
+        }
+
+        /* Chat / Data List */
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-item:active, .chat-item:hover {
+            background-color: #1f1f1f;
+        }
+
+        .chat-item {
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .pin-action {
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            z-index: 2;
+            border: 1px solid #3b3b3d;
+            border-radius: 18px;
+            padding: 8px 13px;
+            color: #fff;
+            background: #29292b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .45);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            font-weight: 600;
+            color: #fff;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .chat-content {
+            flex: 1;
+            min-width: 0;
+            border-bottom: 1px solid #1c1c1c;
+            padding-bottom: 10px;
+        }
+
+        .chat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .chat-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f5f5f5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #8e8e93;
+            flex-shrink: 0;
+        }
+
+        .check-icon {
+            color: #4ecc5e;
+            font-size: 13px;
+        }
+
+        .pin-badge {
+            background-color: #262628;
+            padding: 3px 7px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #8e8e93;
+        }
+
+        .pin-badge i {
+            font-size: 10px;
+            transform: rotate(45deg);
+        }
+
+        .chat-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-preview {
+            font-size: 14.5px;
+            color: #8e8e93;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-preview span.you-text {
+            color: #e0e0e0;
+        }
+
+        .unread-badge {
+            background-color: #4ecc5e;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        /* Floating Add Button */
+        .fab-add {
+            position: fixed;
+            bottom: 92px;
+            right: 18px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #52b756;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            cursor: pointer;
+            z-index: 90;
+            transition: transform 0.2s;
+        }
+
+        .fab-add:active {
+            transform: scale(0.92);
+        }
+
+        /* Bottom Floating Pill Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 420px;
+            background-color: rgba(32, 32, 34, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 6px 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #9e9ea3;
+            font-size: 11px;
+            padding: 6px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-item.active {
+            background-color: rgba(78, 204, 94, 0.15);
+            color: #4ecc5e;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 12px;
+            background-color: #4ecc5e;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 5px;
+            border-radius: 10px;
+        }
+
+        /* Modals (Add & View Data) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 16px;
+        }
+
+        .modal-box {
+            background-color: #222224;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #4ecc5e;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            background-color: #161618;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-group textarea {
+            height: 90px;
+            resize: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ddd;
+            margin-bottom: 18px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .btn-save {
+            background-color: #4ecc5e;
+            color: #fff;
+        }
+
+        .btn-delete {
+            background-color: #e53935;
+            color: #fff;
+            margin-right: auto;
+        }
+
+        .view-details-box {
+            background: #161618;
+            padding: 12px;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 15px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 18px;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid #2c2c2c;
+        }
+
+        .group-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            isolation: isolate;
+            overflow: hidden;
+            background: #02030a;
+        }
+
+        .group-wallpaper {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 50% 50%, #10132a 0%, #070914 48%, #02030a 100%);
+            perspective: 1000px;
+        }
+
+        .group-wallpaper .aurora {
+            position: absolute;
+            width: 150%;
+            height: 70%;
+            left: -25%;
+            top: 15%;
+            border-radius: 50%;
+            filter: blur(65px);
+            opacity: .48;
+            background: linear-gradient(90deg, transparent, #153b9b, #672bba, #00a9b7, #243f9e, transparent);
+            animation: auroraMove 16s ease-in-out infinite alternate;
+        }
+
+        .group-wallpaper .aurora.two {
+            width: 120%;
+            height: 45%;
+            top: 50%;
+            left: -10%;
+            opacity: .25;
+            filter: blur(85px);
+            background: linear-gradient(90deg, transparent, #4d1d8e, #007d9d, #4426b1, transparent);
+            animation: auroraMove2 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes auroraMove {
+            0% { transform: translate(-10%, -10%) rotate(-20deg) scale(.9); }
+            100% { transform: translate(12%, 15%) rotate(15deg) scale(1.2); }
+        }
+
+        @keyframes auroraMove2 {
+            0% { transform: translate(10%, 0) rotate(25deg) scale(1); }
+            100% { transform: translate(-10%, -15%) rotate(-15deg) scale(1.3); }
+        }
+
+        .group-wallpaper .orb {
+            position: absolute;
+            border: 1px solid rgba(160, 210, 255, .3);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.5), rgba(80,150,255,.12) 18%, rgba(65,35,150,.10) 55%, rgba(0,0,0,.1) 75%);
+            box-shadow: inset -12px -15px 35px rgba(0,0,0,.5), inset 5px 5px 20px rgba(255,255,255,.12), 0 0 35px rgba(64,130,255,.13);
+            backdrop-filter: blur(3px);
+            transform-style: preserve-3d;
+        }
+
+        .group-wallpaper .orb.one { width: 125px; height: 125px; top: 17%; left: 9%; animation: orbFloat1 11s ease-in-out infinite; }
+        .group-wallpaper .orb.two { width: 70px; height: 70px; top: 48%; right: 12%; animation: orbFloat2 9s ease-in-out infinite; }
+        .group-wallpaper .orb.three { width: 165px; height: 165px; bottom: 12%; left: 22%; opacity: .65; animation: orbFloat3 14s ease-in-out infinite; }
+        .group-wallpaper .orb.four { width: 42px; height: 42px; top: 25%; right: 20%; animation: orbFloat2 8s ease-in-out infinite reverse; }
+
+        @keyframes orbFloat1 {
+            0%, 100% { transform: translate3d(0,0,20px) rotate(0deg); }
+            50% { transform: translate3d(30px,45px,80px) rotate(25deg); }
+        }
+        @keyframes orbFloat2 {
+            0%, 100% { transform: translate3d(0,0,0); }
+            50% { transform: translate3d(-35px,-45px,70px) rotate(40deg); }
+        }
+        @keyframes orbFloat3 {
+            0%, 100% { transform: translate3d(0,0,0) scale(.9); }
+            50% { transform: translate3d(40px,-35px,80px) scale(1.08); }
+        }
+
+        .group-wallpaper .ring {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border: 2px solid rgba(75,175,255,.35);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0,170,255,.18), inset 0 0 15px rgba(0,170,255,.12);
+            transform-style: preserve-3d;
+        }
+        .group-wallpaper .ring.one { top: 28%; left: 38%; animation: ringRotate 18s linear infinite; }
+        .group-wallpaper .ring.two { width: 110px; height: 110px; bottom: 22%; right: 15%; border-color: rgba(180,90,255,.4); animation: ringRotate2 13s linear infinite; }
+
+        @keyframes ringRotate {
+            from { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); }
+            to { transform: rotateX(65deg) rotateY(360deg) rotateZ(360deg); }
+        }
+        @keyframes ringRotate2 {
+            from { transform: rotateX(70deg) rotateY(0deg); }
+            to { transform: rotateX(70deg) rotateY(-360deg); }
+        }
+
+        .group-wallpaper .particles { position: absolute; inset: 0; }
+        .group-wallpaper .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: #a9eaff;
+            box-shadow: 0 0 12px 3px rgba(60,170,255,.7);
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+        .group-wallpaper .particle:nth-child(1) { left: 10%; top: 20%; }
+        .group-wallpaper .particle:nth-child(2) { left: 80%; top: 18%; animation-delay: 2s; }
+        .group-wallpaper .particle:nth-child(3) { left: 65%; top: 65%; animation-delay: 1s; }
+        .group-wallpaper .particle:nth-child(4) { left: 25%; top: 75%; animation-delay: 3s; }
+        .group-wallpaper .particle:nth-child(5) { left: 90%; top: 45%; animation-delay: 4s; }
+        .group-wallpaper .particle:nth-child(6) { left: 45%; top: 90%; animation-delay: 2.5s; }
+        .group-wallpaper .particle:nth-child(7) { left: 50%; top: 12%; animation-delay: 1.5s; }
+        .group-wallpaper .particle:nth-child(8) { left: 15%; top: 55%; animation-delay: 3.5s; }
+
+        @keyframes particleFloat {
+            0%, 100% { opacity: .1; transform: translateY(0) scale(.5); }
+            50% { opacity: 1; transform: translateY(-35px) scale(1.7); }
+        }
+
+        .group-wallpaper .depth-light {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,.35) 100%);
+        }
+
+        .group-header, .group-messages, .group-composer {
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .group-wallpaper *, .group-wallpaper *::before, .group-wallpaper *::after {
+                animation: none !important;
+            }
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: #181818;
+            box-shadow: 0 2px 6px rgba(0,0,0,.35);
+        }
+
+        .group-back {
+            border: 0;
+            background: none;
+            color: #eee;
+            font-size: 20px;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .group-header .avatar {
+            width: 46px;
+            height: 46px;
+        }
+
+        .group-heading { min-width: 0; flex: 1; }
+        .group-heading strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .group-heading small { color: #aaa; }
+
+        .group-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .group-message {
+            position: relative;
+            max-width: 88%;
+            align-self: flex-end;
+            padding: 10px 12px;
+            border-radius: 14px 14px 4px 14px;
+            background: #285b39;
+            color: #fff;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            line-height: 1.45;
+            touch-action: pan-y;
+        }
+
+        .group-message time {
+            display: block;
+            margin-top: 5px;
+            color: #c7d9c9;
+            font-size: 11px;
+            text-align: right;
+        }
+
+        .group-message img, .group-message video {
+            display: block;
+            max-width: min(100%, 420px);
+            max-height: 55vh;
+            border-radius: 9px;
+            margin-bottom: 6px;
+        }
+
+        .group-message video { width: 100%; cursor: zoom-in; }
+        .group-message img { cursor: zoom-in; }
+        .pdf-attachment {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: min(100%, 320px);
+            padding: 12px;
+            border-radius: 9px;
+            background: rgba(0, 0, 0, .2);
+            color: #fff;
+            cursor: pointer;
+            overflow-wrap: anywhere;
+        }
+        .pdf-attachment i { font-size: 26px; color: #ff8a80; }
+        .media-download {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .78);
+            color: #fff;
+            font-size: 19px;
+            cursor: pointer;
+        }
+        .group-message.show-download .media-download { display: block; }
+        .media-viewer {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(0, 0, 0, .96);
+        }
+        .media-viewer.open { display: flex; }
+        .media-viewer img, .media-viewer video, .media-viewer iframe {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border: 0;
+        }
+        .viewer-close {
+            position: absolute;
+            top: max(14px, env(safe-area-inset-top));
+            right: 16px;
+            z-index: 1;
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(45, 45, 45, .9);
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        .group-empty { color: #aaa; text-align: center; margin: auto; padding: 20px; }
+
+        .group-composer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+            background: #181818;
+        }
+
+        .group-composer input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            border-radius: 24px;
+            padding: 13px 16px;
+            color: white;
+            background: #292929;
+            font-size: 15px;
+        }
+
+        .group-composer button, .attach-button {
+            border: 0;
+            color: #ddd;
+            background: transparent;
+            font-size: 21px;
+            padding: 9px;
+            cursor: pointer;
+        }
+
+        .group-composer .send-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: white;
+            background: #4ecc5e;
+        }
+
+        #attachmentInput { display: none; }
+        @media (min-width: 700px) {
+            .group-screen { width: 100%; max-width: 709px; left: 50%; transform: translateX(-50%); border-left: 1px solid #303030; border-right: 1px solid #303030; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header (Windows Icon + Telegram) -->
+    <div class="header">
+        <div class="header-left">
+            <i class="fa-brands fa-windows windows-icon"></i>
+            <div class="header-title">Database</div>
+        </div>
+        <div class="header-right">
+            <i class="fas fa-search" onclick="toggleSearch()"></i>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container" id="searchBox">
+        <input type="text" id="searchInput" placeholder="Search saved data..." oninput="renderList()">
+    </div>
+
+    <!-- Database AI entry -->
+    <div class="archived-row" role="button" tabindex="0" onclick="openAiAssistant()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAiAssistant();}">
+        <div class="ai-orb" aria-hidden="true"><span>AI</span></div>
+        <div class="chat-content" style="border:none; padding-bottom:0;">
+            <div class="chat-top">
+                <div class="chat-title">Database Ai</div>
+            </div>
+            <div class="chat-bottom">
+                <div class="chat-preview">Ask about your saved groups and files</div>
+                <div class="unread-badge" style="background-color: #3a3a3c;" id="totalCountBadge">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Data List -->
+    <div class="chat-list" id="chatList"></div>
+
+    <section class="ai-assistant" id="aiAssistant" aria-label="Database AI assistant">
+        <header class="ai-header">
+            <button class="ai-close" type="button" onclick="closeAiAssistant()" aria-label="Back"><i class="fas fa-arrow-left"></i></button>
+            <div class="ai-orb" aria-hidden="true"><span>AI</span></div>
+            <div class="ai-heading"><strong>Database Ai</strong><small>Search your saved database</small></div>
+            <button class="ai-settings-toggle" type="button" onclick="toggleAiKeyPanel()" aria-label="Gemini API settings"><i class="fas fa-key"></i></button>
+        </header>
+        <form class="ai-key-panel" id="aiKeyPanel" onsubmit="saveGeminiKey(event)">
+            <input id="geminiKeyInput" type="password" autocomplete="off" placeholder="Paste a newly created Gemini API key">
+            <button type="submit">Save for this tab</button>
+            <small style="flex-basis:100%; color:#bbb;">Gemini receives saved text (including passwords) and file names when you ask. Only continue if you accept Google processing this data. The key stays in this tab.</small>
+        </form>
+        <div class="ai-messages" id="aiMessages" aria-live="polite">
+            <div class="ai-bubble">Ask me to find a saved group, note, password, photo, video or PDF. I search this device's saved data only.</div>
+        </div>
+        <form class="ai-composer" onsubmit="askDatabaseAi(event)">
+            <input id="aiInput" type="text" placeholder="Ask about your saved data..." autocomplete="off">
+            <button type="submit" aria-label="Send"><i class="fas fa-arrow-up"></i></button>
+        </form>
+    </section>
+
+    <!-- Floating Add Button Only (Camera Icon Removed) -->
+    <div class="fab-add" onclick="openAddModal()">
+        <i class="fas fa-comment-medical"></i>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="filterItems('all', this)">
+            <div class="nav-badge" id="navTotalBadge">0</div>
+            <i class="fas fa-comments"></i>
+            <span>Chats</span>
+        </div>
+        <div class="nav-item" onclick="filterItems('pinned', this)">
+            <i class="far fa-user-circle"></i>
+            <span>Pinned</span>
+        </div>
+        <div class="nav-item" onclick="openAddModal()">
+            <i class="fas fa-cog"></i>
+            <span>Add New</span>
+        </div>
+        <div class="nav-item" onclick="showComingSoon()">
+            <i class="fas fa-user-shield"></i>
+            <span>Profile</span>
+        </div>
+    </div>
+
+    <!-- Add Data Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+            <div class="modal-title">Create Database Group</div>
+            <div class="form-group">
+                <label>Database name</label>
+                <input type="text" id="dataTitle" placeholder="Enter a group name">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
+                <button class="btn btn-save" onclick="saveData()">Save Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group detail screen: text/password notes and photo/video attachments -->
+    <section class="group-screen" id="groupScreen">
+        <div class="group-wallpaper" aria-hidden="true">
+            <div class="aurora"></div>
+            <div class="aurora two"></div>
+            <div class="orb one"></div>
+            <div class="orb two"></div>
+            <div class="orb three"></div>
+            <div class="orb four"></div>
+            <div class="ring one"></div>
+            <div class="ring two"></div>
+            <div class="particles">
+                <i class="particle"></i><i class="particle"></i>
+                <i class="particle"></i><i class="particle"></i>
+                <i class="particle"></i><i class="particle"></i>
+                <i class="particle"></i><i class="particle"></i>
+            </div>
+            <div class="depth-light"></div>
+        </div>
+        <div class="group-header">
+            <button class="group-back" onclick="closeGroup()" aria-label="Back"><i class="fas fa-arrow-left"></i></button>
+            <div class="avatar" id="groupAvatar"></div>
+            <div class="group-heading">
+                <strong id="groupTitle"></strong>
+            </div>
+        </div>
+        <div class="group-messages" id="groupMessages"></div>
+        <form class="group-composer" onsubmit="sendGroupText(event)">
+            <label class="attach-button" for="attachmentInput" aria-label="Add photos, videos or PDF files"><i class="fas fa-paperclip"></i></label>
+            <input id="attachmentInput" type="file" accept="image/*,video/*,application/pdf,.pdf" multiple onchange="saveGroupFiles(event)">
+            <input type="text" id="groupTextInput" placeholder="Write a password or note..." autocomplete="off">
+            <button class="send-button" type="submit" aria-label="Save"><i class="fas fa-arrow-up"></i></button>
+        </form>
+    </section>
+
+    <div class="media-viewer" id="mediaViewer" onclick="closeMediaViewer()">
+        <button class="viewer-close" type="button" aria-label="Close preview" onclick="closeMediaViewer()"><i class="fas fa-times"></i></button>
+        <div id="mediaViewerContent" style="display: contents;" onclick="event.stopPropagation()"></div>
+    </div>
+    <div class="app-toast" id="appToast" role="status" aria-live="polite"></div>
+
+    <script>
+        const avatarColors = ['#4ea4d9', '#e5963c', '#53b757', '#9b59b6', '#e74c3c', '#1abc9c', '#3b5998'];
+        let currentViewId = null;
+        let currentFilter = 'all';
+
+        const defaultData = [
+            { id: 1, title: "Aff - 4936873", note: "Ok bro", time: "Thu", pinned: true, prefixYou: true, color: "#4ea4d9" },
+            { id: 2, title: "m 🐕", note: "What about creatives?", time: "Oct 24", pinned: true, prefixYou: false, color: "#3b5998" },
+            { id: 3, title: "අපි දෙන්නා තනි උනා 😭", note: "🖼️ Photo", time: "17:51", pinned: true, prefixYou: false, color: "#53b757" },
+            { id: 4, title: "4172055 (4360363) 1x", note: "Ok bro", time: "17:50", pinned: true, prefixYou: true, color: "#e5963c" },
+            { id: 5, title: "Kavishka Lakshn 462765...", note: "Please reply...", time: "17:46", pinned: true, prefixYou: true, color: "#4ea4d9" },
+            { id: 6, title: "⚡ VIRAT Lakshan | WIN", note: "🎥 Video message", time: "18:42", pinned: false, prefixYou: false, unread: 98, color: "#9b59b6" }
+        ];
+
+        let appData = JSON.parse(localStorage.getItem('myTelegramVaultData'));
+        if (!appData) {
+            appData = defaultData;
+            localStorage.setItem('myTelegramVaultData', JSON.stringify(appData));
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('myTelegramVaultData', JSON.stringify(appData));
+        }
+
+        function getInitials(name) {
+            return Array.from(name.trim())[0]?.toUpperCase() || '?';
+        }
+
+        function renderList() {
+            const listContainer = document.getElementById('chatList');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            listContainer.innerHTML = '';
+
+            let sortedData = [...appData].sort((a, b) => (b.pinned === true) - (a.pinned === true));
+
+            sortedData = sortedData.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery) || (item.note || '').toLowerCase().includes(searchQuery);
+                const matchesTab = currentFilter === 'all' ? true : item.pinned === true;
+                return matchesSearch && matchesTab;
+            });
+
+            document.getElementById('totalCountBadge').innerText = appData.length;
+            document.getElementById('navTotalBadge').innerText = appData.length;
+
+            sortedData.forEach(item => {
+                const initials = getInitials(item.title);
+                const metaRight = item.pinned
+                    ? '<i class="fas fa-thumbtack check-icon" aria-label="Pinned"></i>'
+                    : '';
+
+                const previewText = item.note || 'Database group';
+                const previewHTML = item.prefixYou 
+                    ? `<span class="you-text">You: </span>${escapeHtml(previewText)}`
+                    : escapeHtml(previewText);
+
+                const unreadHTML = item.unread 
+                    ? `<div class="unread-badge">${item.unread}</div>` 
+                    : '';
+
+                const row = document.createElement('div');
+                row.className = 'chat-item';
+                let longPressTriggered = false;
+                let pressTimer;
+                row.onclick = () => {
+                    if (longPressTriggered) {
+                        longPressTriggered = false;
+                        return;
+                    }
+                    openGroup(item.id);
+                };
+                row.onpointerdown = () => {
+                    longPressTriggered = false;
+                    pressTimer = setTimeout(() => {
+                        longPressTriggered = true;
+                        setTimeout(() => { longPressTriggered = false; }, 1200);
+                        const action = document.createElement('button');
+                        action.className = 'pin-action';
+                        action.type = 'button';
+                        action.innerHTML = `<i class="fas fa-thumbtack"></i> ${item.pinned ? 'Unpin' : 'Pin'}`;
+                        action.onclick = event => {
+                            event.stopPropagation();
+                            item.pinned = !item.pinned;
+                            saveToStorage();
+                            renderList();
+                        };
+                        row.querySelector('.pin-action')?.remove();
+                        row.appendChild(action);
+                    }, 550);
+                };
+                ['pointerup', 'pointerleave', 'pointercancel'].forEach(type => {
+                    row.addEventListener(type, () => clearTimeout(pressTimer));
+                });
+                row.innerHTML = `
+                    <div class="avatar" style="background-color: ${item.color || '#4ea4d9'}">${initials}</div>
+                    <div class="chat-content">
+                        <div class="chat-top">
+                            <div class="chat-title">${escapeHtml(item.title)}</div>
+                            <div class="chat-meta">${metaRight}</div>
+                        </div>
+                        <div class="chat-bottom">
+                            <div class="chat-preview">${previewHTML}</div>
+                            ${unreadHTML}
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function openAiAssistant() {
+            document.getElementById('aiAssistant').classList.add('open');
+            document.getElementById('aiInput').focus();
+        }
+
+        function closeAiAssistant() {
+            document.getElementById('aiAssistant').classList.remove('open');
+        }
+
+        function saveAiConversation() {
+            const messages = Array.from(document.querySelectorAll('#aiMessages .ai-bubble'))
+                .map(bubble => ({
+                    text: bubble.innerText || '',
+                    type: bubble.classList.contains('user') ? 'user' : bubble.classList.contains('error') ? 'error' : ''
+                }));
+            try { localStorage.setItem('myVaultAiConversation', JSON.stringify(messages)); } catch (error) {}
+        }
+
+        function restoreAiConversation() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('myVaultAiConversation') || '[]');
+                if (!Array.isArray(saved) || !saved.length) return;
+                const container = document.getElementById('aiMessages');
+                container.innerHTML = '';
+                saved.forEach(message => addAiBubble(message.text || '', message.type || '', false));
+            } catch (error) {}
+        }
+
+        function addAiBubble(text, type = '', persist = true) {
+            const container = document.getElementById('aiMessages');
+            const bubble = document.createElement('div');
+            bubble.className = `ai-bubble ${type}`.trim();
+            bubble.innerText = text;
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
+            if (persist) saveAiConversation();
+            return bubble;
+        }
+
+        function toggleAiKeyPanel() {
+            document.getElementById('aiKeyPanel').classList.toggle('open');
+        }
+
+        function saveGeminiKey(event) {
+            event.preventDefault();
+            const input = document.getElementById('geminiKeyInput');
+            const key = input.value.trim();
+            if (!key) {
+                sessionStorage.removeItem('databaseGeminiApiKey');
+                showAppToast('Gemini key cleared. Local search remains available.');
+            } else {
+                sessionStorage.setItem('databaseGeminiApiKey', key);
+                showAppToast('Gemini is ready for this tab.');
+            }
+            input.value = '';
+            document.getElementById('aiKeyPanel').classList.remove('open');
+        }
+
+        let toastTimer;
+        function showAppToast(message) {
+            const toast = document.getElementById('appToast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+        }
+
+        function showComingSoon() {
+            showAppToast('✨ Coming soon — profile features are on the way!');
+        }
+
+        function databaseAiSearch(query) {
+            const normalized = query.toLocaleLowerCase();
+            const wantsVideo = /video|videos|clip|විඩියෝ|වීඩියෝ/.test(normalized);
+            const wantsPhoto = /photo|photos|image|images|picture|pictures|පොටො|ෆොටෝ|පින්තූර/.test(normalized);
+            const wantsPdf = /pdf|document|documents|ඩොකියුමන්ට්/.test(normalized);
+            const stopWords = new Set(['find', 'show', 'search', 'look', 'for', 'where', 'is', 'are', 'my', 'the', 'a', 'an', 'in', 'from', 'please', 'get', 'give', 'me', 'what', 'about', 'this', 'that', 'all', 'saved', 'database', 'group', 'groups', 'and', 'or']);
+            const terms = (normalized.match(/[\p{L}\p{N}]+/gu) || [])
+                .filter(term => !stopWords.has(term) && term.length > 1);
+
+            return appData.map(item => {
+                const messages = item.messages || [];
+                const searchable = [item.title, item.note, ...messages.flatMap(message => [message.text || '', message.fileName || ''])]
+                    .join(' ').toLocaleLowerCase();
+                const mediaMessages = messages.filter(message => message.mediaId);
+                const matchedMedia = mediaMessages.filter(message => {
+                    const name = (message.fileName || '').toLocaleLowerCase();
+                    const isPdf = /\.pdf$/.test(name);
+                    const isVideo = /\.(mp4|webm|mov|m4v|ogv|avi)$/.test(name);
+                    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|heic|heif|svg)$/.test(name);
+                    if (wantsPdf) return isPdf;
+                    if (wantsVideo) return isVideo;
+                    if (wantsPhoto) return isImage;
+                    return true;
+                });
+                if ((wantsVideo || wantsPhoto || wantsPdf) && !matchedMedia.length) return null;
+
+                let score = normalized.trim() && searchable.includes(normalized.trim()) ? 5 : 0;
+                terms.forEach(term => { if (searchable.includes(term)) score += 2; });
+                if ((wantsVideo || wantsPhoto || wantsPdf) && matchedMedia.length) score += 4;
+                if (!terms.length && !wantsVideo && !wantsPhoto && !wantsPdf) return null;
+                return score > 0 ? { item, score, matchedMedia } : null;
+            }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 8);
+        }
+
+        function getDatabaseContext() {
+            return appData.map(item => ({
+                group: item.title,
+                note: item.note || '',
+                entries: (item.messages || []).map(message => ({
+                    text: message.text || '',
+                    file: message.fileName || ''
+                }))
+            }));
+        }
+
+        async function askGemini(query) {
+            const key = sessionStorage.getItem('databaseGeminiApiKey');
+            const prompt = `Answer in Sinhala using ONLY the saved database context below. Do not invent facts or expose unrelated entries. If no relevant data exists, say that no matching data was found.\n\nSaved database context (JSON): ${JSON.stringify(getDatabaseContext())}\n\nUser question: ${query}`;
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error?.message || 'Could not contact Gemini. Check the API key and model access.');
+            const answer = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+            if (!answer) throw new Error('Gemini returned an empty reply.');
+            return answer;
+        }
+
+        function localDatabaseAnswer(results) {
+            return results.map(({ item, matchedMedia }) => {
+                const savedText = (item.messages || []).map(message => message.text || '').filter(Boolean).join(' · ') || item.note || 'No text saved';
+                const files = matchedMedia.map(message => message.fileName).filter(Boolean);
+                return `${item.title}\n${savedText}${files.length ? `\nFiles: ${files.join(', ')}` : ''}`;
+            }).join('\n\n');
+        }
+
+        async function askDatabaseAi(event) {
+            event.preventDefault();
+            const input = document.getElementById('aiInput');
+            const query = input.value.trim();
+            if (!query) return;
+            addAiBubble(query, 'user');
+            input.value = '';
+
+            const loading = addAiBubble('Searching…');
+            const results = databaseAiSearch(query);
+            try {
+                let answer;
+                if (sessionStorage.getItem('databaseGeminiApiKey')) {
+                    answer = await askGemini(query);
+                } else if (results.length) {
+                    answer = `Found ${results.length} matching result(s):\n\n${localDatabaseAnswer(results)}\n\nAdd a Gemini API key in settings for AI-generated replies.`;
+                } else {
+                    answer = 'ERROR: No matching data was found in the database.';
+                }
+                loading.remove();
+                addAiBubble(answer, answer.startsWith('ERROR:') ? 'error' : '');
+            } catch (error) {
+                loading.remove();
+                addAiBubble(`ERROR: ${error.message || 'Could not contact Gemini.'}`, 'error');
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('dataTitle').value = '';
+            document.getElementById('addModal').style.display = 'flex';
+            document.getElementById('dataTitle').focus();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        function saveData() {
+            const title = document.getElementById('dataTitle').value.trim();
+
+            if (!title) {
+                alert("කරුණාකර Database name එක ඇතුලත් කරන්න!");
+                return;
+            }
+
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+
+            const newItem = {
+                id: Date.now(),
+                title: title,
+                note: '',
+                messages: [],
+                time: timeString,
+                pinned: false,
+                prefixYou: false,
+                color: randomColor
+            };
+
+            appData.push(newItem);
+            saveToStorage();
+            renderList();
+            closeAddModal();
+        }
+
+        function openGroup(id) {
+            const item = appData.find(group => group.id === id);
+            if (!item) return;
+            currentViewId = id;
+            document.getElementById('groupTitle').innerText = item.title;
+            const avatar = document.getElementById('groupAvatar');
+            avatar.innerText = getInitials(item.title);
+            avatar.style.backgroundColor = item.color || '#4ea4d9';
+            document.getElementById('groupScreen').style.display = 'flex';
+            renderGroupMessages();
+        }
+
+        function closeGroup() {
+            document.getElementById('groupScreen').style.display = 'none';
+            currentViewId = null;
+        }
+
+        function getMediaDatabase() {
+            return new Promise((resolve, reject) => {
+                if (!('indexedDB' in window)) return reject(new Error('Media storage is unavailable'));
+                const request = indexedDB.open('myVaultMedia', 1);
+                request.onupgradeneeded = () => request.result.createObjectStore('files');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function storeMedia(id, file) {
+            const db = await getMediaDatabase();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction('files', 'readwrite');
+                transaction.objectStore('files').put(file, id);
+                transaction.oncomplete = () => { db.close(); resolve(); };
+                transaction.onerror = () => { db.close(); reject(transaction.error); };
+            });
+        }
+
+        async function readMedia(id) {
+            const db = await getMediaDatabase();
+            return new Promise((resolve, reject) => {
+                const request = db.transaction('files', 'readonly').objectStore('files').get(id);
+                request.onsuccess = () => { db.close(); resolve(request.result); };
+                request.onerror = () => { db.close(); reject(request.error); };
+            });
+        }
+
+        function renderGroupMessages() {
+            const container = document.getElementById('groupMessages');
+            const item = appData.find(group => group.id === currentViewId);
+            if (!item) return;
+            container.innerHTML = '';
+            const messages = [...(item.messages || [])];
+            if (!messages.length && item.note) {
+                messages.push({ text: item.note, time: item.time || '' });
+            }
+            if (!messages.length) {
+                container.innerHTML = '<div class="group-empty">This group is empty. Save a password, note, photo, video or PDF below.</div>';
+                return;
+            }
+            messages.forEach(message => {
+                const bubble = document.createElement('div');
+                bubble.className = 'group-message';
+                if (message.mediaId) {
+                    const downloadButton = document.createElement('button');
+                    downloadButton.className = 'media-download';
+                    downloadButton.type = 'button';
+                    downloadButton.title = 'Download attachment';
+                    downloadButton.setAttribute('aria-label', 'Download attachment');
+                    downloadButton.innerHTML = '<i class="fas fa-download"></i>';
+                    downloadButton.onclick = event => {
+                        event.stopPropagation();
+                        downloadMedia(message.mediaId, message.fileName);
+                    };
+                    bubble.appendChild(downloadButton);
+                } else if (message.text) {
+                    const text = document.createElement('div');
+                    text.innerText = message.text;
+                    bubble.appendChild(text);
+                }
+                if (message.mediaId) {
+                    readMedia(message.mediaId).then(file => {
+                        if (!file || !bubble.isConnected) return;
+                        const url = URL.createObjectURL(file);
+                        const fileName = message.fileName || 'saved-file';
+                        let media;
+                        const isPdf = file.type === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
+                        if (file.type.startsWith('video/')) {
+                            media = document.createElement('video');
+                            media.controls = true;
+                            media.src = url;
+                            media.addEventListener('click', () => {
+                                if (bubble.dataset.longPressed) {
+                                    delete bubble.dataset.longPressed;
+                                    return;
+                                }
+                                openMediaViewer(url, 'video');
+                            });
+                        } else if (isPdf) {
+                            media = document.createElement('div');
+                            media.className = 'pdf-attachment';
+                            media.innerHTML = '<i class="fas fa-file-pdf"></i><span></span>';
+                            media.querySelector('span').innerText = fileName;
+                            media.addEventListener('click', () => {
+                                if (bubble.dataset.longPressed) {
+                                    delete bubble.dataset.longPressed;
+                                    return;
+                                }
+                                openMediaViewer(url, 'pdf');
+                            });
+                        } else {
+                            media = document.createElement('img');
+                            media.src = url;
+                            media.alt = fileName;
+                            media.addEventListener('click', () => {
+                                if (bubble.dataset.longPressed) {
+                                    delete bubble.dataset.longPressed;
+                                    return;
+                                }
+                                openMediaViewer(url, 'image');
+                            });
+                        }
+                        media.addEventListener(file.type.startsWith('video/') ? 'loadedmetadata' : 'load', () => {
+                            container.scrollTop = container.scrollHeight;
+                        }, { once: true });
+                        bubble.insertBefore(media, bubble.querySelector('.media-download'));
+                        container.scrollTop = container.scrollHeight;
+                    }).catch(() => {});
+                }
+                let pressTimer;
+                let longPressHandled = false;
+                bubble.addEventListener('pointerdown', () => {
+                    longPressHandled = false;
+                    pressTimer = setTimeout(() => {
+                        longPressHandled = true;
+                        if (message.mediaId) {
+                            bubble.classList.add('show-download');
+                            bubble.dataset.longPressed = 'true';
+                        } else if (message.text) {
+                            copyMessage(message.text);
+                        }
+                    }, 550);
+                });
+                ['pointerup', 'pointerleave', 'pointercancel'].forEach(type => {
+                    bubble.addEventListener(type, () => clearTimeout(pressTimer));
+                });
+                bubble.addEventListener('click', () => {
+                    if (!message.mediaId) bubble.classList.remove('show-download');
+                });
+                const time = document.createElement('time');
+                time.innerText = message.time || '';
+                bubble.appendChild(time);
+                container.appendChild(bubble);
+            });
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        function openMediaViewer(url, type) {
+            const content = document.getElementById('mediaViewerContent');
+            content.innerHTML = '';
+            let media;
+            if (type === 'video') {
+                media = document.createElement('video');
+                media.controls = true;
+                media.autoplay = true;
+            } else if (type === 'pdf') {
+                media = document.createElement('iframe');
+                media.title = 'PDF preview';
+            } else {
+                media = document.createElement('img');
+                media.alt = 'Photo preview';
+            }
+            media.src = url;
+            content.appendChild(media);
+            document.getElementById('mediaViewer').classList.add('open');
+        }
+
+        function closeMediaViewer() {
+            const viewer = document.getElementById('mediaViewer');
+            viewer.classList.remove('open');
+            const video = viewer.querySelector('video');
+            if (video) video.pause();
+            document.getElementById('mediaViewerContent').innerHTML = '';
+        }
+
+        async function downloadMedia(mediaId, fileName) {
+            try {
+                const file = await readMedia(mediaId);
+                if (!file) throw new Error('File not found');
+                const url = URL.createObjectURL(file);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName || 'saved-file';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (error) {
+                alert('Could not download this file.');
+            }
+        }
+
+        async function copyMessage(text) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const temporary = document.createElement('textarea');
+                    temporary.value = text;
+                    temporary.style.position = 'fixed';
+                    temporary.style.opacity = '0';
+                    document.body.appendChild(temporary);
+                    temporary.select();
+                    document.execCommand('copy');
+                    temporary.remove();
+                }
+            } catch (error) {
+                alert('Could not copy this message.');
+            }
+        }
+
+        function currentTimeLabel() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function sendGroupText(event) {
+            event.preventDefault();
+            const input = document.getElementById('groupTextInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const item = appData.find(group => group.id === currentViewId);
+            if (!item) return;
+            item.messages = item.messages || [];
+            item.messages.push({ id: Date.now(), text, time: currentTimeLabel() });
+            item.note = text;
+            saveToStorage();
+            input.value = '';
+            renderGroupMessages();
+            renderList();
+        }
+
+        async function saveGroupFiles(event) {
+            const input = event.target;
+            const item = appData.find(group => group.id === currentViewId);
+            if (!item) return;
+            const files = Array.from(input.files || []);
+            for (const file of files) {
+                const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                if (!file.type.startsWith('image/') && !file.type.startsWith('video/') && !isPdf) continue;
+                const mediaId = `${currentViewId}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                try {
+                    await storeMedia(mediaId, file);
+                    item.messages = item.messages || [];
+                    const mediaLabel = isPdf ? '📄 PDF' : file.type.startsWith('video/') ? '🎥 Video' : '🖼️ Photo';
+                    item.messages.push({ id: mediaId, mediaId, fileName: file.name, time: currentTimeLabel() });
+                    item.note = mediaLabel;
+                } catch (error) {
+                    alert('Could not save this file. Device storage may be full or unavailable.');
+                    break;
+                }
+            }
+            saveToStorage();
+            input.value = '';
+            renderGroupMessages();
+            renderList();
+        }
+
+        function deleteCurrentItem() {
+            if (confirm('Delete this group and its saved entries?')) {
+                appData = appData.filter(i => i.id !== currentViewId);
+                saveToStorage();
+                renderList();
+                closeGroup();
+            }
+        }
+
+        function copyCurrentItem() {
+            const item = appData.find(i => i.id === currentViewId);
+            if (item) {
+                navigator.clipboard.writeText(`${item.title}\n${item.note}`);
+                alert("විස්තරය Copy කරගත්තා!");
+            }
+        }
+
+        function toggleSearch() {
+            const box = document.getElementById('searchBox');
+            if (box.style.display === 'block') {
+                box.style.display = 'none';
+                document.getElementById('searchInput').value = '';
+                renderList();
+            } else {
+                box.style.display = 'block';
+                document.getElementById('searchInput').focus();
+            }
+        }
+
+        function filterItems(type, el) {
+            currentFilter = type;
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            el.classList.add('active');
+            renderList();
+        }
+
+        function clearAllPrompt() {
+            if (confirm("සැම්පල් ඩේටා ඔක්කොම මකලා මුල ඉඳන් පටන් ගන්නද?")) {
+                appData = [];
+                saveToStorage();
+                renderList();
+            }
+        }
+
+        restoreAiConversation();
+        renderList();
+    </script>
+</body>
+</html>
