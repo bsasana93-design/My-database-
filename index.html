@@ -1086,24 +1086,25 @@
         let currentViewId = null;
         let currentFilter = 'all';
 
-        const defaultData = [
-            { id: 1, title: "Aff - 4936873", note: "Ok bro", time: "Thu", pinned: true, prefixYou: true, color: "#4ea4d9" },
-            { id: 2, title: "m 🐕", note: "What about creatives?", time: "Oct 24", pinned: true, prefixYou: false, color: "#3b5998" },
-            { id: 3, title: "අපි දෙන්නා තනි උනා 😭", note: "🖼️ Photo", time: "17:51", pinned: true, prefixYou: false, color: "#53b757" },
-            { id: 4, title: "4172055 (4360363) 1x", note: "Ok bro", time: "17:50", pinned: true, prefixYou: true, color: "#e5963c" },
-            { id: 5, title: "Kavishka Lakshn 462765...", note: "Please reply...", time: "17:46", pinned: true, prefixYou: true, color: "#4ea4d9" },
-            { id: 6, title: "⚡ VIRAT Lakshan | WIN", note: "🎥 Video message", time: "18:42", pinned: false, prefixYou: false, unread: 98, color: "#9b59b6" }
-        ];
+        const sampleGroupTitles = new Set([
+            "Aff - 4936873",
+            "m 🐕",
+            "අපි දෙන්නා තනි උනා 😭",
+            "4172055 (4360363) 1x",
+            "Kavishka Lakshn 462765...",
+            "⚡ VIRAT Lakshan | WIN"
+        ]);
 
-        let appData = JSON.parse(localStorage.getItem('myTelegramVaultData'));
-        if (!appData) {
-            appData = defaultData;
-            localStorage.setItem('myTelegramVaultData', JSON.stringify(appData));
-        }
+        let appData = JSON.parse(localStorage.getItem('myTelegramVaultData')) || [];
+        if (!Array.isArray(appData)) appData = [];
+        const savedGroupCount = appData.length;
+        appData = appData.filter(item => !sampleGroupTitles.has(item.title));
 
         function saveToStorage() {
             localStorage.setItem('myTelegramVaultData', JSON.stringify(appData));
         }
+
+        if (appData.length !== savedGroupCount) saveToStorage();
 
         function getInitials(name) {
             return Array.from(name.trim())[0]?.toUpperCase() || '?';
